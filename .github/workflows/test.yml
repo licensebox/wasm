@@ -1,0 +1,12 @@
+name: Test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  conformance:
+    uses: licensebox/protocol/.github/workflows/sdk.yml@b499010383b3f15e131c30c71b479b0a56c6d536
+    with:
+      language: wasm

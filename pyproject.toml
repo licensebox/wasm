@@ -1,0 +1,15 @@
+[build-system]
+requires=["setuptools>=68"]
+build-backend="setuptools.build_meta"
+[project]
+name="licensebox-wasm-host"
+version="0.1.0"
+requires-python=">=3.10"
+dynamic=["dependencies"]
+[tool.setuptools.dynamic]
+dependencies={file=["host-dependencies.txt"]}
+[tool.setuptools.packages.find]
+include=["licensebox_wasm*"]
+[tool.setuptools.data-files]
+"include/licensebox"=["include/licensebox_wasm.h"]
+"share/licensebox-wasm/examples"=["examples/guest.c"]
