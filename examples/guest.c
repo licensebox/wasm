@@ -23,3 +23,7 @@ __attribute__((export_name("require_core")))
 int32_t require_core(void) { return invoke("require",7,"{\"module\":\"core\"}",17); }
 __attribute__((export_name("local_status")))
 int32_t local_status(void) { return invoke("status",6,"{}",2); }
+
+/* Opt-in host capability. The embedding app checks ok and the signed deadline. */
+__attribute__((export_name("heartbeat_core")))
+int32_t heartbeat_core(void) { return invoke("heartbeat",9,"{\"module\":\"core\"}",17); }

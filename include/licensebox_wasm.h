@@ -8,6 +8,9 @@
  * At most 16 outstanding responses, maximum 1 MiB each. Invalid pointers trap.
  * Guest pointer arguments must be nonnegative signed i32 (first 2 GiB).
  * Responses are {"ok":true,"value":...} or {"ok":false,"error":"stable_code"}.
+ * Optional heartbeat: request("heartbeat",9,"{\"module\":\"core\"}",17)
+ * returns {lease,online} inside value when explicitly allowed by the host.
+ * The host owns timers and native identity; guest clock/config overrides fail.
  * A failed call never authorizes protected work. Never repeat a mutating request
  * merely to size a buffer: read the same response handle in chunks instead. */
 #if !defined(__wasm32__)
