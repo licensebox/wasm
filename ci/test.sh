@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 python3 -m unittest discover -s tests -p "test_*.py"
-mkdir -p build/wheels build/consumer-site
+mkdir -p build/wheels
+rm -f build/wheels/licensebox_wasm_host-*.whl
+rm -rf build/consumer-site
+mkdir -p build/consumer-site
 python3 -m pip wheel --no-deps --no-build-isolation . -w build/wheels
 python3 -m pip install --no-deps --target build/consumer-site --upgrade build/wheels/*.whl
 compiler=${CLANG:-clang}
