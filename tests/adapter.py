@@ -18,6 +18,11 @@ try:
         if op=="repeat":call("require",{"module":"core"});result=call("require",{"module":"core"})
         elif op=="record":call(op,{"command":"export","success":True,"elapsed":.125});result=call(op,{"command":"export","success":False,"elapsed":.025})
         elif op=="request":result=call(op,{"modules":["export"],"note":"café – test"})
+        elif op in ("heartbeat","heartbeat-repeat","heartbeat-after-require"):
+            module=r.get("module","core")
+            if op=="heartbeat-after-require":call("require",{"module":"core"})
+            if op=="heartbeat-repeat":call("heartbeat",{"module":module})
+            result=call("heartbeat",{"module":module})
         elif op=="require":result=call(op,{"module":r.get("module","core")})
         elif op=="sign_in":result=call(op,{"timeout":3})
         else:result=call(op)

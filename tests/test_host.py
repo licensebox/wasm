@@ -30,6 +30,20 @@ class HostTest(unittest.TestCase):
         self.assertEqual(len(g.call('require',{'module':'core'})['value']['owned']),10000)
         self.assertEqual(c.calls,1)
         self.assertEqual(g.host._responses,{})
+    def test_heartbeat_is_explicit_host_capability_and_executes_once(self):
+        class Client(NativeClient):
+            def heartbeat(self,module):
+                self.calls+=1
+                return {'lease':{'modules':[module],'expires':'2030-01-01T00:00:00Z'},'online':False}
+        c=Client();default=Guest(c)
+        self.assertEqual(default.call('heartbeat',{'module':'core'}),{'ok':False,'error':'operation_denied'})
+        guest=Guest(c,allowed_operations={'heartbeat'})
+        for args in [{},{'module':''},{'module':True},{'module':'core\0other'},{'module':'core','binding':'forbidden'},{'module':'core','clock':0}]:
+            self.assertEqual(guest.call('heartbeat',args),{'ok':False,'error':'invalid_argument'})
+        self.assertEqual(c.calls,0)
+        self.assertEqual(guest.call('heartbeat',{'module':'core'}),{'ok':True,'value':{'lease':{'modules':['core'],'expires':'2030-01-01T00:00:00Z'},'online':False}})
+        self.assertEqual(c.calls,1)
+        self.assertEqual(guest.host._responses,{})
     def test_invalid_memory_and_handles_trap(self):
         g=Guest(NativeClient())
         with self.assertRaises(wasmtime.Trap):g.exports['request'](g.store,-1,4,0,2)

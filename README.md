@@ -98,3 +98,25 @@ real Wasmtime imports. No libc or WASI SDK is needed for that freestanding examp
 Fixtures and keys are synthetic.
 
 MIT. Copyright © 2026 [Vijai Kumar](https://meshing.engineer).
+
+## Optional guest heartbeat checkpoints
+
+A trusted application may opt in with
+`Host(native_client, allowed_operations={"heartbeat", "status"})`. The guest
+operation is `heartbeat` with `{"module":"core"}` and returns
+`{"lease":{...},"online":true|false}` inside the ordinary success envelope.
+The default allowlist remains `require`/`status`. Heartbeat accepts no product,
+keys, server, binding, clock or scheduling override from guest memory.
+
+Heartbeat forces signed renewal through the native Python client with a
+three-second network bound. It never starts activation or key rotation and
+requires saved verified credentials. Explicit refusals, removed modules, invalid
+state and offline expiry fail closed; eligible transport outages may return the
+unexpired saved lease with `online=false`, without moving its deadline. Response
+handles/chunk reads preserve one execution per request, including heartbeat.
+
+The trusted host owns scheduling and must stop protected work by the last
+verified signed expiry independently of a slow check. Read the optional signed
+heartbeat interval/grace from the verified lease. This bridge starts no timer or
+thread and never stops the application itself. Python/Wasmtime on Linux remains
+the validated profile; standalone browser identity remains unsupported.

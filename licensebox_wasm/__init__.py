@@ -5,8 +5,8 @@ import threading
 import wasmtime
 from licensebox import LicenseboxError
 
-OPERATIONS=frozenset({"lease","require","status","sign_in","logout","modules","request","requests","access-link","record"})
-FIELDS={"lease":set(),"require":{"module"},"status":set(),"sign_in":{"timeout"},"logout":set(),"modules":set(),"request":{"modules","note"},"requests":set(),"access-link":set(),"record":{"command","success","elapsed"}}
+OPERATIONS=frozenset({"lease","require","heartbeat","status","sign_in","logout","modules","request","requests","access-link","record"})
+FIELDS={"lease":set(),"require":{"module"},"heartbeat":{"module"},"status":set(),"sign_in":{"timeout"},"logout":set(),"modules":set(),"request":{"modules","note"},"requests":set(),"access-link":set(),"record":{"command","success","elapsed"}}
 LIMIT=1<<20
 class Host:
     """Bind one trusted native Client, never guest-supplied product/keys/identity.
@@ -69,6 +69,9 @@ class Host:
         if op=="require":
             if not isinstance(a.get("module"),str):raise ValueError("module required")
             return c.require(a["module"])
+        if op=="heartbeat":
+            if not isinstance(a.get("module"),str) or not a["module"] or "\0" in a["module"]:raise ValueError("module required")
+            return c.heartbeat(a["module"])
         if op=="lease":return c.lease()
         if op=="status":return c.status()
         if op=="sign_in":
