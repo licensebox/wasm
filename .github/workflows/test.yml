@@ -7,6 +7,6 @@ permissions:
   contents: read
 jobs:
   conformance:
-    uses: licensebox/protocol/.github/workflows/sdk.yml@b499010383b3f15e131c30c71b479b0a56c6d536
+    uses: licensebox/protocol/.github/workflows/sdk.yml@1bfdfb756c07323a74fa5b5a68c447a1fdb17be0
     with:
       language: wasm
