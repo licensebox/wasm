@@ -1,2 +1,2 @@
 wasmtime==39.0.0
-licensebox @ git+https://github.com/licensebox/python.git@v0.2.0
+licensebox @ git+https://github.com/licensebox/python.git@v0.3.0
