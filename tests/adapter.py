@@ -9,13 +9,16 @@ try:
     elif op=="native":result=native_binding(r["product"])
     elif op=="verify":result=verify_lease(r["token"],r["product"],r["keys"],r["now"])
     else:
-        c=Client(r["product"],r["keys"],server=r["server"],directory=r["directory"],version="conformance",clock=lambda:r["now"],machine_binding=lambda:r["binding"],on_sign_in=lambda *_:None)
+        c=Client(r["product"],r["keys"],server=r["server"],directory=r["directory"],version="conformance",clock=lambda:r["now"],machine_binding=lambda:r["binding"],on_sign_in=lambda *_:None,enrol_token=r.get("enrol_token"))
         guest=Guest(c,allowed_operations=OPERATIONS)
         def call(name,args=None):
             value=guest.call(name,args)
             if not value["ok"]:raise LicenseboxError(value["error"])
             return value["value"]
-        if op=="repeat":call("require",{"module":"core"});result=call("require",{"module":"core"})
+        if op=="enrol":result=c.enrol(r["token"])  # host-side: guests never hold tokens
+        elif op=="checkout":result=call(op,{"module":r["module"]})
+        elif op=="checkin":result=call(op,{"modules":[r["module"]]})
+        elif op=="repeat":call("require",{"module":"core"});result=call("require",{"module":"core"})
         elif op=="record":call(op,{"command":"export","success":True,"elapsed":.125});result=call(op,{"command":"export","success":False,"elapsed":.025})
         elif op=="request":result=call(op,{"modules":["export"],"note":"café – test"})
         elif op in ("heartbeat","heartbeat-repeat","heartbeat-after-require"):

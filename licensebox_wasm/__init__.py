@@ -5,8 +5,10 @@ import threading
 import wasmtime
 from licensebox import LicenseboxError
 
-OPERATIONS=frozenset({"lease","require","heartbeat","status","sign_in","logout","modules","request","requests","access-link","record"})
-FIELDS={"lease":set(),"require":{"module"},"heartbeat":{"module"},"status":set(),"sign_in":{"timeout"},"logout":set(),"modules":set(),"request":{"modules","note"},"requests":set(),"access-link":set(),"record":{"command","success","elapsed"}}
+# A guest may check floating copies out and in. Enrolment stays with the host:
+# its token is the host's configuration (Client(enrol_token=...)), never a guest's.
+OPERATIONS=frozenset({"lease","require","heartbeat","status","sign_in","logout","modules","request","requests","access-link","record","checkout","checkin"})
+FIELDS={"lease":set(),"require":{"module"},"heartbeat":{"module"},"status":set(),"sign_in":{"timeout"},"logout":set(),"modules":set(),"request":{"modules","note"},"requests":set(),"access-link":set(),"record":{"command","success","elapsed"},"checkout":{"module"},"checkin":{"modules"}}
 LIMIT=1<<20
 class Host:
     """Bind one trusted native Client, never guest-supplied product/keys/identity.
@@ -82,6 +84,13 @@ class Host:
         if op=="modules":return c.modules()
         if op=="requests":return c.requests()
         if op=="access-link":return c.access_link()
+        if op=="checkout":
+            if not isinstance(a.get("module"),str) or not a["module"] or "\0" in a["module"]:raise ValueError("module required")
+            return c.checkout(a["module"])
+        if op=="checkin":
+            modules=a.get("modules",[])
+            if not isinstance(modules,list) or any(not isinstance(x,str) or "\0" in x for x in modules):raise ValueError("checkin")
+            return c.checkin(*modules)
         if op=="request":
             if not isinstance(a.get("modules"),list) or any(not isinstance(x,str) for x in a["modules"]) or not isinstance(a.get("note",""),str):raise ValueError("request")
             return c.request_access(a["modules"],a.get("note",""))

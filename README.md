@@ -120,3 +120,18 @@ verified signed expiry independently of a slow check. Read the optional signed
 heartbeat interval/grace from the verified lease. This bridge starts no timer or
 thread and never stops the application itself. Python/Wasmtime on Linux remains
 the validated profile; standalone browser identity remains unsupported.
+
+## Seats per module, floating copies and service accounts
+
+Guests call `checkout {"module":...}` and `checkin {"modules":[...]}` through `licensebox_request`. Enrolment stays with the host: construct the host client with `enrol_token=` (or set `LICENSEBOX_ENROL_TOKEN`); a guest never holds the token.
+
+A module can have seats of its own: on a machine without its seat the lease
+names it in `elsewhere`, requiring it fails with `module_denied`, and an
+explicit sign-in moves the seat here. A customer can hold a pool of floating
+copies of a module, named in the lease's `floating`: requiring such a module
+checks a copy out (`no_free_copy` when every copy is in use), heartbeats keep
+it, and checking in returns it. A crashed application's copy is freed when
+the heartbeat grace passes. A server or build runner licensed as a service
+account sets the one-time token an admin issued as `LICENSEBOX_ENROL_TOKEN`
+or the `enrol_token` option: its first lease enrols the machine without a
+browser (`invalid_token` when the token is used or expired).
